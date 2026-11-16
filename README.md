@@ -19,13 +19,13 @@ I documenti dei singoli progetti (`~/projects/<progetto>/`) non fanno parte di q
 Il sistema si aspetta i file nei percorsi della colonna "Dove va installata". Il modo più semplice è clonare il repository e creare collegamenti simbolici:
 
 ```bash
-git clone https://github.com/FCabiddu/sistema-agenti.git ~/sistema-agenti
+git clone https://github.com/FCabiddu/agents-workflow.git ~/agents-workflow
 mkdir -p ~/.claude/skills ~/projects
-ln -s ~/sistema-agenti/claude/CLAUDE.md ~/.claude/CLAUDE.md
-ln -s ~/sistema-agenti/claude/agents ~/.claude/agents
-for s in ~/sistema-agenti/claude/skills/*; do ln -s "$s" ~/.claude/skills/; done
-ln -s ~/sistema-agenti/standards ~/projects/_standards
-ln -s ~/sistema-agenti/template ~/projects/_template
+ln -s ~/agents-workflow/claude/CLAUDE.md ~/.claude/CLAUDE.md
+ln -s ~/agents-workflow/claude/agents ~/.claude/agents
+for s in ~/agents-workflow/claude/skills/*; do ln -s "$s" ~/.claude/skills/; done
+ln -s ~/agents-workflow/standards ~/projects/_standards
+ln -s ~/agents-workflow/template ~/projects/_template
 ```
 
 Se i file esistono già in quei percorsi, spostali prima altrove.
