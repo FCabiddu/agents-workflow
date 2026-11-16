@@ -1,0 +1,276 @@
+/* ===========================================================================
+   CSS richiesto dai componenti del catalogo (motion/, scroll-object-3d/, ui/).
+   Da importare nel globals.css del progetto, dopo Tailwind e il CSS di Lenis:
+     @import "tailwindcss";
+     @import "lenis/dist/lenis.css";
+     @import "<percorso>/styles.css";
+   Il layout deve aggiungere la classe `js` a <html> prima del rendering
+   (vedi README) perché funzioni il pre-nascondimento del testo animato.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Token del tema. Palette neutra di default: sostituire con quella del progetto.
+   ThemeShift anima queste variabili su <html> (bg, fg, muted, accent, line, card).
+   --------------------------------------------------------------------------- */
+:root {
+  --bg: #111214;
+  --fg: #f2f2f0;
+  --muted: #a6a7a3;
+  --accent: #d9b56a;
+  --line: rgba(242, 242, 240, 0.14);
+  /* Sfondo delle card OPACO: se un oggetto 3D passa dietro una card con sfondo
+     semitrasparente, traspare sotto il testo. Calcolare la tinta opaca equivalente
+     invece di usare rgba. */
+  --card: #1b1c1f;
+  /* Font: collegarli a next/font nel progetto (classe Tailwind font-display, vedi README) */
+  --font-display: Georgia, serif;
+  --font-body: system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+/* Sfondo esplicito: ThemeShift cambia --bg e la pagina deve seguirlo */
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* ---------------------------------------------------------------------------
+   data-motion-hide: BlurRevealText e MaskReveal nascondono il testo prima
+   dell'idratazione solo con JS attivo (classe .js su <html>) e movimento ammesso.
+   Se lo script non parte entro 4 s, l'animazione CSS lo rende visibile.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-motion-hide] {
+    opacity: 0;
+    visibility: hidden;
+    animation: motion-failsafe 0s linear 4s forwards;
+  }
+}
+@keyframes motion-failsafe {
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ScrollObject3D: livello 3D fisso dietro la pagina (il contenuto va a z-index > 0).
+   Con prefers-reduced-motion il livello occupa solo la prima schermata e scorre via.
+   --------------------------------------------------------------------------- */
+.object-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .object-layer {
+    position: absolute;
+    height: 100svh;
+  }
+}
+
+/* Fallback senza WebGL: va messo dove sta l'oggetto nella PRIMA posa.
+   Conversione dalla posa: centro = (50 + x*50)vw, (50 - y*50)svh;
+   lato ≈ scale * 20svh * dimensione dell'oggetto in unità.
+   Valori sotto: posa { x: 0.52, y: 0.02, scale: 1.3 } con oggetto di 2 unità. */
+.object-fallback {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  top: calc(49svh - 26svh);
+  left: calc(76vw - 26svh);
+  width: 52svh;
+  height: 52svh;
+  filter: drop-shadow(0 24px 30px rgb(0 0 0 / 0.45));
+}
+.object-fallback > img,
+.object-fallback > svg,
+.object-fallback > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 767.98px) {
+  .object-fallback {
+    top: calc(25svh - 14.4svh);
+    left: calc(50vw - 14.4svh);
+    width: 28.8svh;
+    height: 28.8svh;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Texture sovrapposte: grana sempre, ombra "a tapparella" solo quando
+   ThemeShift imposta data-theme="light" su <html>. Due <div> nel layout:
+     <div className="grain-overlay" aria-hidden="true" />
+     <div className="theme-overlay" aria-hidden="true" />
+   --------------------------------------------------------------------------- */
+.grain-overlay,
+.theme-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+.grain-overlay {
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.theme-overlay {
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: opacity 1.2s ease;
+  background:
+    radial-gradient(120% 80% at 85% 0%, transparent 40%, rgba(60, 40, 10, 0.18) 100%),
+    repeating-linear-gradient(-24deg, rgba(70, 50, 20, 0) 0 46px, rgba(70, 50, 20, 0.16) 46px 78px);
+  filter: blur(6px);
+}
+html[data-theme="light"] .theme-overlay {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-overlay {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   GlowBorder: gradiente conico che ruota grazie a @property, più alone sfocato.
+   --------------------------------------------------------------------------- */
+@property --glow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.glow-border {
+  position: relative;
+  border-radius: var(--glow-radius);
+  padding: var(--glow-thickness);
+  isolation: isolate;
+}
+.glow-border::before,
+.glow-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle), var(--glow-colors));
+  animation: glow-spin var(--glow-speed) linear infinite;
+  z-index: -1;
+}
+.glow-border::after {
+  inset: -6px;
+  filter: blur(22px);
+  opacity: 0.55;
+  z-index: -2;
+}
+.glow-border__inner {
+  position: relative;
+  height: 100%;
+  border-radius: calc(var(--glow-radius) - var(--glow-thickness));
+  background: var(--bg);
+}
+@keyframes glow-spin {
+  to {
+    --glow-angle: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-border::before,
+  .glow-border::after {
+    animation: none;
+    --glow-angle: 35deg;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   HorizontalGallery: scorrimento nativo con scroll-snap di base,
+   pin + traslazione (gestiti da GSAP) solo su desktop con movimento ammesso.
+   --------------------------------------------------------------------------- */
+.hg {
+  overflow-x: clip;
+}
+.hg-viewport {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5rem;
+  padding-block: 6rem;
+}
+.hg-track {
+  display: flex;
+  gap: 1.25rem;
+  padding-inline: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+  padding-block: 1rem;
+}
+.hg-track > * {
+  flex: 0 0 min(82vw, 22rem);
+  scroll-snap-align: start;
+}
+@media (min-width: 768px) {
+  .hg-track {
+    gap: 2rem;
+    padding-inline: max(2rem, calc((100vw - 72rem) / 2));
+    scroll-padding-inline: max(2rem, calc((100vw - 72rem) / 2));
+  }
+  .hg-track > * {
+    flex-basis: 26rem;
+  }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .hg-viewport {
+    min-height: 100svh;
+    padding-block: 5rem 3rem;
+  }
+  .hg-track {
+    overflow: visible;
+    width: max-content;
+    scroll-snap-type: none;
+    padding-bottom: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ContactForm: pulsante di invio e campo esca (honeypot) fuori dallo schermo.
+   --------------------------------------------------------------------------- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 0.85rem 1.6rem;
+  font-weight: 600;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px -10px var(--accent);
+}
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Scroll nativo morbido solo quando Lenis non è attivo */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
