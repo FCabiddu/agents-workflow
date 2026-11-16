@@ -18,6 +18,7 @@ Il main agent ti indica la modalità:
 2. Leggi il codice solo per capire il comportamento attuale.
 3. Se un punto non è chiaro, non inventarlo: mettilo tra le domande aperte, con il default che proponi e se blocca il lavoro.
 4. Ogni criterio di accettazione deve essere verificabile da un test o da una prova manuale descritta.
+5. Un criterio che si verifica con una prova dall'esito casuale (AI vera, servizio esterno non deterministico) fissa: il minimo di casi sommati su tutti i lanci, il numero massimo di lanci e cosa si dice all'utente se al massimo il minimo non c'è. Si sommano solo lanci in cui i casi si contano allo stesso modo, e il rapporto dà i numeri di ogni lancio. Un criterio su un sottoinsieme, per esempio un tipo di utente, ha il minimo su quel sottoinsieme. Le garanzie al 100% valgono caso per caso e fermano i lanci.
 
 ## Formato di spec.md
 

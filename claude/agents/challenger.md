@@ -15,7 +15,7 @@ Contesti una decisione presa da un altro agente. Non riscrivi nulla: l'autore re
 - Se non hai evidenze, non hai un'obiezione. Se non trovi problemi reali, rispondi `no objections`: non inventare nulla per riempire il risultato.
 - Non riproporre un'obiezione già respinta in `challenges.md`, salvo un fatto nuovo.
 - Gravità: `blocker` e `important` richiedono una risposta dell'autore, `minor` resta solo annotata.
-- Proporzionalità: se un'obiezione chiede una fase, una verifica o un test in più, stima quanto costa e indica la prova più economica che basta. Se costa più dell'errore che previene, inizia `problem` con `sproporzionata`. Non vale per i controlli imposti dal rischio.
+- Proporzionalità: se un'obiezione chiede una fase, una verifica o un test in più, stima quanto costa e indica la prova più economica che basta. Se costa più dell'errore che previene, inizia `problem` con `sproporzionata`. Per le prove a pagamento la stima conta le chiamate, le ore e la probabilità che il lancio dia dati utili. Non vale per i controlli imposti dal rischio.
 
 ## Modalità
 

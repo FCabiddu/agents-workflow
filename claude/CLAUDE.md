@@ -68,7 +68,7 @@ Domande all'utente:
   - Le obiezioni `minor` e le correzioni di testo le applica l'autore, senza un altro giro.
   - Dopo l'ultimo giro chiedi all'utente solo le obiezioni rimaste che cambiano ciò che vede, il rischio o il perimetro. Le altre si chiudono con il default dell'autore, dichiarato in `challenges.md`.
 - Su una modifica visiva di peso M o L, prima di spec e design, un task XS mostra all'utente la modifica grezza, per esempio con uno screenshot. Spec e design partono dalla direzione che l'utente conferma.
-- Budget di tempo per peso, esclusa l'attesa dell'utente: XS 30 minuti, S 2 ore, M un giorno. Oltre il doppio fermati e avvisa l'utente.
+- Budget di tempo per peso, esclusa l'attesa dell'utente: XS 30 minuti, S 2 ore, M un giorno. Oltre il doppio fermati e avvisa l'utente. Il tempo di un task che lancia una prova a pagamento comprende i task di correzione dello strumento di prova che quel lancio genera.
 - Il rischio aggiunge i controlli indicati dal triage su qualsiasi peso. `security` e `test` sono agenti. `privacy`, `accessibility`, `performance` e `seo` sono skill del `reviewer`, che in quel caso parte anche su XS.
 - Su XS il `reviewer` parte anche quando una regola del task ha `Verifica: reviewer`.
 
@@ -76,16 +76,25 @@ Domande all'utente:
 
 Ogni lavoro vive in `~/projects/<progetto>/features/<nome-breve>/`. Su XS e S crea tu `tasks/001-<nome>.md` dal formato `~/projects/_standards/formats/task.md`, con aree, peso, rischio, controlli e regole del triage. Su M e L i task li scrive il `planner`.
 
-Prima del primo task chiedi in un solo messaggio, insieme al risultato del `planner` o, su XS e S, alla riga del triage, tutti gli ok che serviranno ai task. Chiedili per tipo di azione e con limiti controllabili, per esempio il DB attivo da verificare, i servizi esterni spenti e le sole scritture ammesse, come indicato in `project.md`. Un ok vale per tutta la feature finché non cambiano le scritture o i servizi chiamati. I controlli previsti prima di ogni comando restano a ogni esecuzione. Produzione e AI o servizi a pagamento non sono mai coperti: si chiedono ogni volta. Mentre aspetti una risposta, porta avanti i task che non ne dipendono.
+Prima del primo task chiedi in un solo messaggio, insieme al risultato del `planner` o, su XS e S, alla riga del triage, tutti gli ok che serviranno ai task. Chiedili per tipo di azione e con limiti controllabili, per esempio il DB attivo da verificare, i servizi esterni spenti e le sole scritture ammesse, come indicato in `project.md`. Un ok vale per tutta la feature finché non cambiano le scritture o i servizi chiamati. I controlli previsti prima di ogni comando restano a ogni esecuzione. Produzione e AI o servizi a pagamento non sono mai coperti: si chiedono ogni volta. Fa eccezione, solo per AI e servizi a pagamento, un ok esplicito dell'utente per una feature, scritto nelle "Regole dell'utente" di `project.md` con un numero massimo di lanci e un tetto di chiamate: raggiunto uno dei due, ti fermi e torni dall'utente con una raccomandazione. Mentre aspetti una risposta, porta avanti i task che non ne dipendono.
+
+Prima di ogni lancio a pagamento:
+
+- la prova a vuoto percorre il cammino vero fino al primo punto di spesa;
+- se lo strumento che produce il rapporto è cambiato ed esistono catture vere di un lancio precedente, il rapporto si rifà gratis su quelle;
+- la stima che decide se lanciare, rilanciare o correggere prima conta le chiamate, le ore e la probabilità che il lancio dia dati utili;
+- un caso che lo strumento di prova non sa valutare si diagnostica prima sulle catture, senza spesa. Lo strumento si corregge prima del lancio successivo solo se falsa conteggi, spesa o arresto, o se la diagnosi mostra che il piano non può dare casi. Un difetto dell'app apre il suo task. Negli altri casi il motivo resta nel rapporto e si rilancia, entro il numero massimo di lanci.
+
+Un limite di attesa o di ritmo che ti sei dato tu, come una pausa tra due lanci, si verifica con una lettura gratuita prima di applicarlo. Se l'utente dice che non vale, lo togli oppure gli mostri nello stesso messaggio la prova che vale. Non riguarda i tetti di spesa, la sicurezza e la produzione.
 
 Per ogni task:
 
 1. Scegli un task `todo` con le dipendenze `done`, mettilo `in_progress` e scrivi l'ora in `started_at`.
 2. Lancia l'esecutore dell'area del task. Se l'area è `security` o `test`, usa la modalità `task`. Passa il percorso del file del task, le parti di `spec.md` e `design.md` che lo riguardano, `ui.md` se esiste, `project.md`, la cartella di lavoro e una sottocartella dello scratchpad solo sua, per esempio `<scratchpad>/<feature>-<id>-<agente>/`.
-3. Quando l'esecutore consegna, scrivi tu la sezione "Esecuzione" del task dal suo blocco YAML. Dopo ogni scrittura nel file del task controlla che la dimensione sia plausibile e che ogni intestazione compaia una sola volta. Poi metti il task `review` ed esegui i comandi di test e lint indicati in `project.md`: la suite completa una sola volta per task e una suite alla volta nella stessa cartella.
+3. Quando l'esecutore consegna, scrivi tu la sezione "Esecuzione" del task dal suo blocco YAML. Dopo ogni scrittura nel file del task controlla che la dimensione sia plausibile e che ogni intestazione compaia una sola volta. Poi metti il task `review` ed esegui i comandi di test e lint indicati in `project.md`: la suite completa una sola volta per task e una sola suite completa alla volta su tutta la macchina, anche tra worktree diversi.
 4. Quando i comandi hanno finito, lancia i controlli previsti dal percorso e da `checks` del task: `reviewer`, `security` in modalità `review` e `test` in modalità `check`, passando task, diff, cartella di lavoro, l'esito dei comandi e a ognuno la sua sottocartella dello scratchpad. `test` in modalità `check` non gira mai insieme ad altri controlli nella stessa cartella: parte prima lui, poi `reviewer` e `security` in parallelo sul diff finale, compresi i test che ha aggiunto. Riporta tu il loro esito nella sezione "Controlli" del task.
 5. Se un controllo fallisce, torna all'esecutore con il risultato e aumenta `attempts`. Dopo 2 tentativi metti il task `blocked`, lancia `challenger` in modalità `blocked_task` e poi chiedi all'utente.
-6. Con tutti i controlli superati, metti il task `done`, aggiorna `status.md` e scrivi una riga in `metrics.md`.
+6. Con tutti i controlli superati, metti il task `done`, aggiorna `status.md` e scrivi una riga in `metrics.md`. `status.md` resta un indice breve: stato, lavori in corso e prossimi passi. Il racconto di una feature sta nella sua cartella, e quando una feature è accettata in `status.md` ne resta una riga.
 
 Quando una correzione è rimandata a un task separato, in `errors.md` o altrove, aggiungila ai "Prossimi passi" di `status.md` con il rimando alla voce. Quando il task è fatto, togli la riga e scrivi "Stato: corretto" nella voce.
 
@@ -112,7 +121,9 @@ Leggi `commit` e `branching` in `project.md`.
 
 **Con `commit: user`.** Nessun agente usa comandi git che modificano il repository. Prima di ogni task indica all'utente il branch da creare, dopo il task i commit e i merge da fare, e aspetta la sua conferma. I task vanno uno alla volta.
 
-**Con `commit: agent`.** Branch, commit, push e merge li fai tu, mai gli esecutori. Puoi lanciare in parallelo task senza dipendenze tra loro e con elenchi `files` che non si sovrappongono, ciascuno in un worktree `~/projects/<progetto>/worktrees/<feature>-<id>`, da rimuovere dopo il merge. Dopo il merge cancella il branch. Non usare push forzati e non riscrivere la storia già pubblicata.
+**Con `commit: agent`.** Branch, commit, push e merge li fai tu, mai gli esecutori. Puoi lanciare in parallelo task senza dipendenze tra loro e con elenchi `files` che non si sovrappongono, ciascuno in un worktree `~/projects/<progetto>/worktrees/<feature>-<id>`, da rimuovere dopo il merge. Dopo il merge cancella il branch. Non usare push forzati e non riscrivere la storia già pubblicata. Dopo ogni merge di un task nel ramo della feature lancia il controllo dei tipi e le guardie indicati in `project.md` e controlla che il log contenga i commit di tutti i task chiusi.
+
+**Lavoro messo in pausa.** Quando una feature si ferma con modifiche non salvate, con `commit: agent` fai subito un commit provvisorio sul ramo del task, con `commit: user` indichi il comando all'utente. Il task resta `in_progress` con la nota «commit provvisorio, controlli da fare», e nei "Prossimi passi" di `status.md` scrivi cosa manca.
 
 **Con `branching: gitflow`.** Si parte da `develop`. Se `develop` non esiste, fermati e chiedi.
 
@@ -160,13 +171,14 @@ Un problema si corregge alla terza ripetizione, un danno si discute subito. Quan
 
 ## Metriche
 
-Alla fine di ogni task aggiungi una riga a `metrics.md` del progetto, con l'inizio da `started_at` e la fine presa da `date`. Dopo la verifica dell'utente aggiungi l'esito.
+Alla fine di ogni task aggiungi una riga a `metrics.md` del progetto, con l'inizio da `started_at` e la fine presa da `date`. Nella colonna "Controlli (min)" scrivi i minuti passati dalla consegna dell'esecutore alla fine dei controlli. Dopo la verifica dell'utente aggiungi l'esito.
 
 ## Accessi
 
 - Non scrivere e non stampare il valore di segreti. `access.md` contiene solo riferimenti.
 - Passa un segreto solo al singolo comando che lo usa, per esempio `VAR="$(security find-generic-password -s <voce> -w)" comando`.
 - Database: in sviluppo segui `agents` di `access.md`. In produzione solo lettura, con l'utente dedicato, query con limite di righe e timeout, preferendo conteggi e aggregati e solo le colonne necessarie.
+- Un comando lanciato con l'ambiente svuotato (`env -i`) riceve anche `LANG=C LC_ALL=C`: senza lingua alcuni programmi, come Postgres locale, non partono.
 - Non usare comandi che cambiano un account per tutte le sessioni, come `gh auth switch` e `git config --global`.
 - Prima del primo push di una sessione, confronta remote ed email git con `access.md`. Se non coincidono, fermati e avvisa.
 - Usa `gh` con la configurazione del progetto: `GH_CONFIG_DIR=<gh_config> gh ...`.
