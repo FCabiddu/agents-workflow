@@ -36,3 +36,5 @@ Le soluzioni sono divise per costo di applicazione in un nuovo progetto (vedi `_
 | Riferimento | Cosa contiene | Scheda |
 |---|---|---|
 | ORYZO (sito scrollytelling) | Oggetto 3D legato allo scroll, testi blur reveal, galleria orizzontale pinned, effetto termico, transizioni tema chiaro/scuro | `riferimenti/oryzo.md` |
+| Sfondi non bianchi (reel Marcelo Design X) | Cinque bianchi sporchi e grigi chiari al posto del bianco, titoli display a tutta larghezza, titolo che si inclina allo scroll, interfacce a vetro | `riferimenti/sfondi-non-bianchi.md` |
+| Siti 3D legati allo scroll (reel Marcelo Design X) | Camera dentro una villa, modelli che si montano da pezzi esplosi, wireframe, particelle, prodotto 3D con luci | `riferimenti/siti-3d-scroll.md` |
